@@ -3,9 +3,11 @@ var router = express.Router();
 var winston = require('winston');
 var MongoClient = require('mongodb').MongoClient;
 
-var logger = new (winston.Logger)({
+var logger = new(winston.Logger)({
     transports: [
-        new (winston.transports.File)({ filename: '/root/concepts-json/node_modules/sct-snapshot-rest-api/search.log' })
+        new(winston.transports.File)({
+            filename: '/Users/michaelyuan/Documents/development/IHTSDO/sct-snapshot-rest-api/search.log'
+        })
     ]
 });
 
@@ -21,7 +23,7 @@ var performMongoDbRequest = function(databaseName, callback) {
         callback(databases[databaseName]);
     } else {
         //console.log("Connecting");
-        MongoClient.connect("mongodb://localhost:27017/"+databaseName, function(err, db) {
+        MongoClient.connect("mongodb://localhost:27017/" + databaseName, function(err, db) {
             if (err) {
                 console.warn(getTime() + " - " + err.message);
                 res.status(500);
@@ -38,7 +40,13 @@ var performMongoDbRequest = function(databaseName, callback) {
 router.get('/:db/:collection/concepts/:sctid?', function(req, res) {
     var idParam = parseInt(req.params.sctid);
     var idParamStr = req.params.sctid;
-    var query = { '$or': [ {'conceptId': idParam }, {'conceptId': idParamStr } ]};
+    var query = {
+        '$or': [{
+            'conceptId': idParam
+        }, {
+            'conceptId': idParamStr
+        }]
+    };
     var options = req.params.options || {};
     var test = ['limit', 'sort', 'fields', 'skip', 'hint', 'explain', 'snapshot', 'timeout'];
     for (o in req.query) {
@@ -68,7 +76,13 @@ router.get('/:db/:collection/concepts/:sctid?', function(req, res) {
 router.get('/:db/:collection/concepts/:sctid/descriptions/:descriptionId?', function(req, res) {
     var idParam = parseInt(req.params.sctid);
     var idParamStr = req.params.sctid;
-    var query = { '$or': [ {'conceptId': idParam }, {'conceptId': idParamStr } ]};
+    var query = {
+        '$or': [{
+            'conceptId': idParam
+        }, {
+            'conceptId': idParamStr
+        }]
+    };
     var options = req.params.options || {};
     var test = ['limit', 'sort', 'fields', 'skip', 'hint', 'explain', 'snapshot', 'timeout'];
     for (o in req.query) {
@@ -109,7 +123,13 @@ router.get('/:db/:collection/concepts/:sctid/descriptions/:descriptionId?', func
 router.get('/:db/:collection/concepts/:sctid/relationships?', function(req, res) {
     var idParam = parseInt(req.params.sctid);
     var idParamStr = req.params.sctid;
-    var query = { '$or': [ {'conceptId': idParam }, {'conceptId': idParamStr } ]};
+    var query = {
+        '$or': [{
+            'conceptId': idParam
+        }, {
+            'conceptId': idParamStr
+        }]
+    };
     var form = "all";
     if (req.query["form"]) {
         form = req.query["form"];
@@ -153,13 +173,52 @@ router.get('/:db/:collection/concepts/:sctid/relationships?', function(req, res)
 router.get('/:db/:collection/concepts/:sctid/children?', function(req, res) {
     var idParam = parseInt(req.params.sctid);
     var idParamStr = req.params.sctid;
-    var query = {"relationships": {"$elemMatch": {"$or": [ {"target.conceptId": idParam, "type.conceptId": 116680003 }, {"target.conceptId": idParamStr , "type.conceptId": "116680003"} ], "active": true}}};
+    var query = {
+        "relationships": {
+            "$elemMatch": {
+                "$or": [{
+                    "target.conceptId": idParam,
+                    "type.conceptId": 116680003
+                }, {
+                    "target.conceptId": idParamStr,
+                    "type.conceptId": "116680003"
+                }],
+                "active": true
+            }
+        }
+    };
     if (req.query["form"]) {
         if (req.query["form"] == "inferred") {
-            query = {"relationships": {"$elemMatch": {"$or": [ {"target.conceptId": idParam, "type.conceptId": 116680003 }, {"target.conceptId": idParamStr , "type.conceptId": "116680003"} ], "active": true }}};
+            query = {
+                "relationships": {
+                    "$elemMatch": {
+                        "$or": [{
+                            "target.conceptId": idParam,
+                            "type.conceptId": 116680003
+                        }, {
+                            "target.conceptId": idParamStr,
+                            "type.conceptId": "116680003"
+                        }],
+                        "active": true
+                    }
+                }
+            };
         }
         if (req.query["form"] == "stated") {
-            query = {"statedRelationships": {"$elemMatch": {"$or": [ {"target.conceptId": idParam, "type.conceptId": 116680003 }, {"target.conceptId": idParamStr , "type.conceptId": "116680003"} ], "active": true }}};
+            query = {
+                "statedRelationships": {
+                    "$elemMatch": {
+                        "$or": [{
+                            "target.conceptId": idParam,
+                            "type.conceptId": 116680003
+                        }, {
+                            "target.conceptId": idParamStr,
+                            "type.conceptId": "116680003"
+                        }],
+                        "active": true
+                    }
+                }
+            };
         }
 
     }
@@ -171,7 +230,15 @@ router.get('/:db/:collection/concepts/:sctid/children?', function(req, res) {
             options[o] = JSON.parse(req.query[o]);
         }
     }
-    options["fields"] = {"defaultTerm": 1, "conceptId": 1, "active": 1, "definitionStatus": 1, "module": 1, "isLeafInferred": 1,"isLeafStated": 1};
+    options["fields"] = {
+        "defaultTerm": 1,
+        "conceptId": 1,
+        "active": 1,
+        "definitionStatus": 1,
+        "module": 1,
+        "isLeafInferred": 1,
+        "isLeafStated": 1
+    };
     performMongoDbRequest(req.params.db, function(db) {
         var collection = db.collection(req.params.collection);
         collection.find(query, options, function(err, cursor) {
@@ -195,7 +262,18 @@ router.get('/:db/:collection/concepts/:sctid/children?', function(req, res) {
 router.get('/:db/:collection/concepts/:sctid/references?', function(req, res) {
     var idParam = parseInt(req.params.sctid);
     var idParamStr = req.params.sctid;
-    var query = {"relationships": {"$elemMatch": {"$or": [ {"target.conceptId": idParam }, {"target.conceptId": idParamStr } ], "active": true}}};
+    var query = {
+        "relationships": {
+            "$elemMatch": {
+                "$or": [{
+                    "target.conceptId": idParam
+                }, {
+                    "target.conceptId": idParamStr
+                }],
+                "active": true
+            }
+        }
+    };
     var options = req.params.options || {};
     var test = ['limit', 'sort', 'fields', 'skip', 'hint', 'explain', 'snapshot', 'timeout'];
     for (o in req.query) {
@@ -206,17 +284,73 @@ router.get('/:db/:collection/concepts/:sctid/references?', function(req, res) {
 
     if (req.query["form"]) {
         if (req.query["form"] == "inferred") {
-            query = {"relationships": {"$elemMatch": {"$or": [ {"target.conceptId": idParam }, {"target.conceptId": idParamStr } ], "active": true}}};
-//            options["relationships"] = {"$elemMatch": {"target.conceptId": idParam, "active": true}};
-            options["fields"] = {"relationships": {"$elemMatch": {"$or": [ {"target.conceptId": idParam }, {"target.conceptId": idParamStr } ], "active": true}}, "defaultTerm": 1, "conceptId": 1, "active": 1, "definitionStatus": 1, "effectiveTime": 1, "module": 1};
+            query = {
+                "relationships": {
+                    "$elemMatch": {
+                        "$or": [{
+                            "target.conceptId": idParam
+                        }, {
+                            "target.conceptId": idParamStr
+                        }],
+                        "active": true
+                    }
+                }
+            };
+            //            options["relationships"] = {"$elemMatch": {"target.conceptId": idParam, "active": true}};
+            options["fields"] = {
+                "relationships": {
+                    "$elemMatch": {
+                        "$or": [{
+                            "target.conceptId": idParam
+                        }, {
+                            "target.conceptId": idParamStr
+                        }],
+                        "active": true
+                    }
+                },
+                "defaultTerm": 1,
+                "conceptId": 1,
+                "active": 1,
+                "definitionStatus": 1,
+                "effectiveTime": 1,
+                "module": 1
+            };
         }
         if (req.query["form"] == "stated") {
-            query = {"statedRelationships": {"$elemMatch": {"$or": [ {"target.conceptId": idParam }, {"target.conceptId": idParamStr } ], "active": true}}};
-            options["fields"] = {"statedRelationships": {"$elemMatch": {"$or": [ {"target.conceptId": idParam }, {"target.conceptId": idParamStr } ], "active": true}}, "defaultTerm": 1, "conceptId": 1, "active": 1, "definitionStatus": 1, "effectiveTime": 1, "module": 1};
+            query = {
+                "statedRelationships": {
+                    "$elemMatch": {
+                        "$or": [{
+                            "target.conceptId": idParam
+                        }, {
+                            "target.conceptId": idParamStr
+                        }],
+                        "active": true
+                    }
+                }
+            };
+            options["fields"] = {
+                "statedRelationships": {
+                    "$elemMatch": {
+                        "$or": [{
+                            "target.conceptId": idParam
+                        }, {
+                            "target.conceptId": idParamStr
+                        }],
+                        "active": true
+                    }
+                },
+                "defaultTerm": 1,
+                "conceptId": 1,
+                "active": 1,
+                "definitionStatus": 1,
+                "effectiveTime": 1,
+                "module": 1
+            };
         }
     }
 
-//    .findOne({"relationships": {"$elemMatch": {"target.conceptId": idParam, "active": true}}},{"relationships": {"$elemMatch": {"target.conceptId": idParam, "active": true}}
+    //    .findOne({"relationships": {"$elemMatch": {"target.conceptId": idParam, "active": true}}},{"relationships": {"$elemMatch": {"target.conceptId": idParam, "active": true}}
 
     performMongoDbRequest(req.params.db, function(db) {
         var collection = db.collection(req.params.collection);
@@ -241,7 +375,13 @@ router.get('/:db/:collection/concepts/:sctid/references?', function(req, res) {
 router.get('/:db/:collection/concepts/:sctid/parents?', function(req, res) {
     var idParam = parseInt(req.params.sctid);
     var idParamStr = req.params.sctid;
-    var query = {"$or": [ {"conceptId": idParam }, {"conceptId": idParamStr } ]};
+    var query = {
+        "$or": [{
+            "conceptId": idParam
+        }, {
+            "conceptId": idParamStr
+        }]
+    };
     var options = req.params.options || {};
     var test = ['limit', 'sort', 'fields', 'skip', 'hint', 'explain', 'snapshot', 'timeout'];
     for (o in req.query) {
@@ -249,7 +389,10 @@ router.get('/:db/:collection/concepts/:sctid/parents?', function(req, res) {
             options[o] = JSON.parse(req.query[o]);
         }
     }
-    options["fields"] = {"relationships": 1, "statedRelationships": 1};
+    options["fields"] = {
+        "relationships": 1,
+        "statedRelationships": 1
+    };
     performMongoDbRequest(req.params.db, function(db) {
         var collection = db.collection(req.params.collection);
         collection.find(query, options, function(err, cursor) {
@@ -261,20 +404,35 @@ router.get('/:db/:collection/concepts/:sctid/parents?', function(req, res) {
                             if (req.query["form"] == "inferred" && docs[0].relationships) {
                                 docs[0].relationships.forEach(function(rel) {
                                     if (rel.active == true && (rel.type.conceptId == 116680003 || rel.type.conceptId == "116680003")) {
-                                        result.push({conceptId: rel.target.conceptId, defaultTerm: rel.target.defaultTerm, definitionStatus: rel.target.definitionStatus, module: rel.target.module});
+                                        result.push({
+                                            conceptId: rel.target.conceptId,
+                                            defaultTerm: rel.target.defaultTerm,
+                                            definitionStatus: rel.target.definitionStatus,
+                                            module: rel.target.module
+                                        });
                                     }
                                 });
                             } else if (req.query["form"] == "stated" && docs[0].statedRelationships) {
                                 docs[0].statedRelationships.forEach(function(rel) {
                                     if (rel.active == true && (rel.type.conceptId == 116680003 || rel.type.conceptId == "116680003")) {
-                                        result.push({conceptId: rel.target.conceptId, defaultTerm: rel.target.defaultTerm, definitionStatus: rel.target.definitionStatus, module: rel.target.module});
+                                        result.push({
+                                            conceptId: rel.target.conceptId,
+                                            defaultTerm: rel.target.defaultTerm,
+                                            definitionStatus: rel.target.definitionStatus,
+                                            module: rel.target.module
+                                        });
                                     }
                                 });
                             }
                         } else if (docs[0].relationships) {
                             docs[0].relationships.forEach(function(rel) {
                                 if (rel.active == true && (rel.type.conceptId == 116680003 || rel.type.conceptId == "116680003")) {
-                                    result.push({conceptId: rel.target.conceptId, defaultTerm: rel.target.defaultTerm, definitionStatus: rel.target.definitionStatus, module: rel.target.module});
+                                    result.push({
+                                        conceptId: rel.target.conceptId,
+                                        defaultTerm: rel.target.defaultTerm,
+                                        definitionStatus: rel.target.definitionStatus,
+                                        module: rel.target.module
+                                    });
                                 }
                             });
                         }
@@ -293,7 +451,18 @@ router.get('/:db/:collection/concepts/:sctid/parents?', function(req, res) {
 router.get('/:db/:collection/concepts/:sctid/members?', function(req, res) {
     var idParam = parseInt(req.params.sctid);
     var idParamStr = req.params.sctid;
-    var query = {"memberships": {"$elemMatch": {"$or": [ {"refset.conceptId": idParam }, {"refset.conceptId": idParamStr } ], "active": true}}};
+    var query = {
+        "memberships": {
+            "$elemMatch": {
+                "$or": [{
+                    "refset.conceptId": idParam
+                }, {
+                    "refset.conceptId": idParamStr
+                }],
+                "active": true
+            }
+        }
+    };
 
     var options = req.params.options || {};
     var test = ['limit', 'sort', 'fields', 'skip', 'hint', 'explain', 'snapshot', 'timeout'];
@@ -302,18 +471,31 @@ router.get('/:db/:collection/concepts/:sctid/members?', function(req, res) {
             options[o] = JSON.parse(req.query[o]);
         }
     }
-    options["fields"] = {"defaultTerm": 1, "conceptId": 1, "active": 1, "definitionStatus": 1, "module": 1, "isLeafInferred": 1,"isLeafStated": 1};
+    options["fields"] = {
+        "defaultTerm": 1,
+        "conceptId": 1,
+        "active": 1,
+        "definitionStatus": 1,
+        "module": 1,
+        "isLeafInferred": 1,
+        "isLeafStated": 1
+    };
     performMongoDbRequest(req.params.db, function(db) {
         var collection = db.collection(req.params.collection);
         if (req.query["paginate"]) {
-            collection.find(query, options).count(function (err, total) {
-                collection.find(query, options).sort({defaultTerm: 1}, function (err, cursor) {
-                    cursor.toArray(function (err, docs) {
+            collection.find(query, options).count(function(err, total) {
+                collection.find(query, options).sort({
+                    defaultTerm: 1
+                }, function(err, cursor) {
+                    cursor.toArray(function(err, docs) {
                         var result = {};
                         result.members = [];
-                        result.details = {'total': total, 'refsetId': idParam };
+                        result.details = {
+                            'total': total,
+                            'refsetId': idParam
+                        };
                         if (docs && docs.length > 0) {
-                            docs.forEach(function (doc) {
+                            docs.forEach(function(doc) {
                                 result.members.push(doc);
                             });
                             res.status(200);
@@ -326,13 +508,16 @@ router.get('/:db/:collection/concepts/:sctid/members?', function(req, res) {
                 });
             });
         } else {
-            collection.find(query, options, function (err, cursor) {
-                cursor.toArray(function (err, docs) {
+            collection.find(query, options, function(err, cursor) {
+                cursor.toArray(function(err, docs) {
                     var result = {};
                     result.members = [];
-                    result.details = {'total': options.limit, 'refsetId': idParam };
+                    result.details = {
+                        'total': options.limit,
+                        'refsetId': idParam
+                    };
                     if (docs && docs.length > 0) {
-                        docs.forEach(function (doc) {
+                        docs.forEach(function(doc) {
                             result.members.push(doc);
                         });
                         res.status(200);
@@ -351,7 +536,9 @@ router.get('/:db/:collection/concepts/:sctid/members?', function(req, res) {
 router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
     var idParam = null;
     var idParamStr = null;
-    var query = {'descriptions.descriptionId': 0};
+    var query = {
+        'descriptions.descriptionId': 0
+    };
     var searchMode = "regex";
     var searchTerm = null;
     var lang = "english";
@@ -366,7 +553,13 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
     if (req.params.sctid) {
         idParam = parseInt(req.params.sctid);
         idParamStr = req.params.sctid;
-        query = {"$or": [ {"descriptionId": idParam }, {"descriptionId": idParamStr } ]};
+        query = {
+            "$or": [{
+                "descriptionId": idParam
+            }, {
+                "descriptionId": idParamStr
+            }]
+        };
     } else {
         if (req.query["query"]) {
             if (!req.query["statusFilter"]) {
@@ -381,11 +574,24 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                 var words = searchTerm.split(" ");
 
                 if (statusFilter == 'inactiveOnly') {
-                    query = {"$and": [],"$or": [{"active": false},{"conceptActive": false}]};
+                    query = {
+                        "$and": [],
+                        "$or": [{
+                            "active": false
+                        }, {
+                            "conceptActive": false
+                        }]
+                    };
                 } else if (statusFilter == 'activeAndInactive') {
-                    query = {"$and": []};
+                    query = {
+                        "$and": []
+                    };
                 } else {
-                    query = {"$and": [], "active": true, "conceptActive": true};
+                    query = {
+                        "$and": [],
+                        "active": true,
+                        "conceptActive": true
+                    };
                 }
 
                 words.forEach(function(word) {
@@ -396,28 +602,79 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                         //console.log("Not normalizing");
                         var expWord = "^" + regExpEscape(word).toLowerCase() + ".*";
                     }
-                    query.$and.push({"words": {"$regex": expWord}});
+                    query.$and.push({
+                        "words": {
+                            "$regex": expWord
+                        }
+                    });
                 });
             } else if (req.query["searchMode"] == "fullText") {
                 //{ $text: { $search: <string>, $language: <string> } }
                 searchMode = req.query["searchMode"];
                 searchTerm = req.query["query"];
                 if (statusFilter == 'inactiveOnly') {
-                    query = {"$text": { "$search": searchTerm, "$language": lang }, "$or": [{"active": false},{"conceptActive": false}]};
+                    query = {
+                        "$text": {
+                            "$search": searchTerm,
+                            "$language": lang
+                        },
+                        "$or": [{
+                            "active": false
+                        }, {
+                            "conceptActive": false
+                        }]
+                    };
                 } else if (statusFilter == 'activeAndInactive') {
-                    query = {"$text": { "$search": searchTerm, "$language": lang } };
+                    query = {
+                        "$text": {
+                            "$search": searchTerm,
+                            "$language": lang
+                        }
+                    };
                 } else {
-                    query = {"$text": { "$search": searchTerm, "$language": lang }, "$and": [{"active": true},{"conceptActive": true}]};
+                    query = {
+                        "$text": {
+                            "$search": searchTerm,
+                            "$language": lang
+                        },
+                        "$and": [{
+                            "active": true
+                        }, {
+                            "conceptActive": true
+                        }]
+                    };
                 }
             } else if (req.query["searchMode"] == "regex") {
                 searchMode = req.query["searchMode"];
                 searchTerm = req.query["query"];
                 if (statusFilter == 'inactiveOnly') {
-                    query = {"term": {"$regex": searchTerm}, "$or": [{"active": false},{"conceptActive": false}]};
+                    query = {
+                        "term": {
+                            "$regex": searchTerm
+                        },
+                        "$or": [{
+                            "active": false
+                        }, {
+                            "conceptActive": false
+                        }]
+                    };
                 } else if (statusFilter == 'activeAndInactive') {
-                    query = {"term": {"$regex": searchTerm}};
+                    query = {
+                        "term": {
+                            "$regex": searchTerm
+                        }
+                    };
                 } else {
-                    query = {"term": {"$regex": searchTerm}, "$and": [{"active": true},{"conceptActive": true}]};
+                    query = {
+                        "term": {
+                            "$regex": searchTerm
+                        },
+                        "$and": [{
+                            "active": true
+                        }, {
+                            "conceptActive": true
+                        }]
+                    };
                 }
             } else {
                 res.status(400);
@@ -459,9 +716,10 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
         }
     }
     options["limit"] = 10000000;
-    if (searchMode == "regex" || searchMode == "partialMatching" || searchMode == "fullText")  {
+    if (searchMode == "regex" || searchMode == "partialMatching" || searchMode == "fullText") {
         performMongoDbRequest(req.params.db, function(db) {
             var collection = db.collection(req.params.collection + 'tx');
+
             function processMatches(cursor) {
                 var dbDuration = Date.now() - start;
                 //logger.log('info', "Starting in = " + (Date.now() - start));
@@ -469,25 +727,50 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                     //logger.log('info', "Arrayed in = " + (Date.now() - start) + " Array: " + docs.length);
                     var result = {};
                     result.matches = [];
-                    result.details = {'total': 0, 'skipTo': skipTo, 'returnLimit': returnLimit};
+                    result.details = {
+                        'total': 0,
+                        'skipTo': skipTo,
+                        'returnLimit': returnLimit
+                    };
                     result.filters = {};
                     result.filters.lang = {};
                     result.filters.semTag = {};
                     result.filters.module = {};
                     result.filters.refsetId = {};
                     if (docs && docs.length > 0) {
-                        result.details = {'total': docs.length, 'skipTo': skipTo, 'returnLimit': returnLimit};
+                        result.details = {
+                            'total': docs.length,
+                            'skipTo': skipTo,
+                            'returnLimit': returnLimit
+                        };
                         if (idParam == docs[0].descriptionId || idParamStr == docs[0].descriptionId) {
-                            result.matches.push({"term": docs[0].term, "conceptId": docs[0].conceptId, "active": docs[0].active, "conceptActive": docs[0].conceptActive, "fsn": docs[0].fsn, "module": docs[0].module});
+                            result.matches.push({
+                                "term": docs[0].term,
+                                "conceptId": docs[0].conceptId,
+                                "active": docs[0].active,
+                                "conceptActive": docs[0].conceptActive,
+                                "fsn": docs[0].fsn,
+                                "module": docs[0].module
+                            });
                             var duration = Date.now() - start;
-                            logger.log('info', 'Search for ' + searchTerm + ' result = ' + docs.length, {searchTerm: searchTerm, database: req.params.db, collection: req.params.collection, searchMode: searchMode, language: lang, statusFilter: statusFilter, matches: docs.length, duration: duration, dbduration: dbDuration});
+                            logger.log('info', 'Search for ' + searchTerm + ' result = ' + docs.length, {
+                                searchTerm: searchTerm,
+                                database: req.params.db,
+                                collection: req.params.collection,
+                                searchMode: searchMode,
+                                language: lang,
+                                statusFilter: statusFilter,
+                                matches: docs.length,
+                                duration: duration,
+                                dbduration: dbDuration
+                            });
                             res.header('Content-Type', 'application/json');
                             res.send(result);
                         } else {
                             var matchedDescriptions = docs.slice(0);
                             //logger.log('info', "Sliced in = " + (Date.now() - start));
                             if (searchMode == "regex" || searchMode == "partialMatching") {
-                                matchedDescriptions.sort(function (a, b) {
+                                matchedDescriptions.sort(function(a, b) {
                                     if (a.term.length < b.term.length)
                                         return -1;
                                     if (a.term.length > b.term.length)
@@ -502,9 +785,9 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
 
                             matchedDescriptions.forEach(function(doc) {
                                 var refsetOk = false;
-                                if (doc.refsetIds){
-                                    doc.refsetIds.forEach(function (refset){
-                                        if (refset == refsetFilter){
+                                if (doc.refsetIds) {
+                                    doc.refsetIds.forEach(function(refset) {
+                                        if (refset == refsetFilter) {
                                             refsetOk = true;
                                         }
                                     });
@@ -517,7 +800,15 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                                                     conceptIds.push(doc.conceptId);
 
                                                     if (count >= skipTo && count < (skipTo + returnLimit)) {
-                                                        result.matches.push({"term": doc.term, "conceptId": doc.conceptId, "active": doc.active, "conceptActive": doc.conceptActive, "fsn": doc.fsn, "module": doc.module, "definitionStatus": doc.definitionStatus});
+                                                        result.matches.push({
+                                                            "term": doc.term,
+                                                            "conceptId": doc.conceptId,
+                                                            "active": doc.active,
+                                                            "conceptActive": doc.conceptActive,
+                                                            "fsn": doc.fsn,
+                                                            "module": doc.module,
+                                                            "definitionStatus": doc.definitionStatus
+                                                        });
                                                     }
                                                     if (result.filters.semTag.hasOwnProperty(doc.semanticTag)) {
                                                         result.filters.semTag[doc.semanticTag] = result.filters.semTag[doc.semanticTag] + 1;
@@ -535,7 +826,7 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                                                         result.filters.module[doc.module] = 1;
                                                     }
                                                     if (doc.refsetIds) {
-                                                        doc.refsetIds.forEach(function (refset) {
+                                                        doc.refsetIds.forEach(function(refset) {
                                                             if (result.filters.refsetId.hasOwnProperty(refset)) {
                                                                 result.filters.refsetId[refset] = result.filters.refsetId[refset] + 1;
                                                             } else {
@@ -543,7 +834,7 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                                                             }
                                                         });
                                                     }
-//                                                if (result.filters.refsetId.hasOwnProperty(doc))
+                                                    //                                                if (result.filters.refsetId.hasOwnProperty(doc))
                                                     count = count + 1;
                                                 }
                                             }
@@ -554,7 +845,18 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                             result.details.total = count;
                             //logger.log('info', "Written in = " + (Date.now() - start));
                             var duration = Date.now() - start;
-                            logger.log('info', 'Search for ' + searchTerm + ' result = ' + docs.length, {searchTerm: searchTerm, database: req.params.db, collection: req.params.collection, searchMode: searchMode, language: lang, statusFilter: statusFilter, moduleFilter: moduleFilter, matches: docs.length, duration: duration, dbduration: dbDuration});
+                            logger.log('info', 'Search for ' + searchTerm + ' result = ' + docs.length, {
+                                searchTerm: searchTerm,
+                                database: req.params.db,
+                                collection: req.params.collection,
+                                searchMode: searchMode,
+                                language: lang,
+                                statusFilter: statusFilter,
+                                moduleFilter: moduleFilter,
+                                matches: docs.length,
+                                duration: duration,
+                                dbduration: dbDuration
+                            });
                             res.header('Content-Type', 'application/json');
                             res.status(200);
                             res.send(result);
@@ -564,7 +866,11 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                         //logger.log('info', 'Search for ' + searchTerm + ' result = ' + docs.length, {searchTerm: searchTerm, database: req.params.db, collection: req.params.collection, searchMode: searchMode, language: lang, statusFilter: statusFilter, matches: docs.length, duration: duration, dbduration: dbDuration});
                         var result = {};
                         result.matches = [];
-                        result.details = {'total': 0, 'skipTo': skipTo, 'returnLimit': returnLimit};
+                        result.details = {
+                            'total': 0,
+                            'skipTo': skipTo,
+                            'returnLimit': returnLimit
+                        };
                         res.send(result);
                     }
                 });
@@ -580,7 +886,16 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                     processMatches(cursor);
                 });
             } else {
-                collection.find(query, { score: { $meta: "textScore" } }).sort({ score: { $meta: "textScore" }, length: 1 }, function (err, cursor) {
+                collection.find(query, {
+                    score: {
+                        $meta: "textScore"
+                    }
+                }).sort({
+                    score: {
+                        $meta: "textScore"
+                    },
+                    length: 1
+                }, function(err, cursor) {
                     if (err) {
                         console.warn(getTime() + " - " + err.message);
                         res.status(500);
@@ -656,87 +971,226 @@ var levDist = function(s, t) {
     return d[n][m];
 }
 
-var defaultDiacriticsRemovalMap = [
-    {'base':'a','letters':/[\u00E1\u00E2\u00E3\u00E4\u00E5\u0101\u0103\u0105\u01CE\u01FB\u00C0\u00C4]/g},
-    {'base':'ae','letters':/[\u00E6\u01FD]/g},
-    {'base':'c','letters':/[\u00E7\u0107\u0109\u010B\u010D]/g},
-    {'base':'d','letters':/[\u010F\u0111\u00F0]/g},
-    {'base':'e','letters':/[\u00E8\u00E9\u00EA\u00EB\u0113\u0115\u0117\u0119\u011B]/g},
-    {'base':'f','letters':/[\u0192]/g},
-    {'base':'g','letters':/[\u011D\u011F\u0121\u0123]/g},
-    {'base':'h','letters':/[\u0125\u0127]/g},
-    {'base':'i','letters':/[\u00ED\u00EC\u00EE\u00EF\u0129\u012B\u012D\u012F\u0131]/g},
-    {'base':'ij','letters':/[\u0133]/g},
-    {'base':'j','letters':/[\u0135]/g},
-    {'base':'k','letters':/[\u0137\u0138]/g},
-    {'base':'l','letters':/[\u013A\u013C\u013E\u0140\u0142]/g},
-    {'base':'n','letters':/[\u00F1\u0144\u0146\u0148\u0149\u014B]/g},
-    {'base':'o','letters':/[\u00F2\u00F3\u00F4\u00F5\u00F6\u014D\u014F\u0151\u01A1\u01D2\u01FF]/g},
-    {'base':'oe','letters':/[\u0153]/g},
-    {'base':'r','letters':/[\u0155\u0157\u0159]/g},
-    {'base':'s','letters':/[\u015B\u015D\u015F\u0161]/g},
-    {'base':'t','letters':/[\u0163\u0165\u0167]/g},
-    {'base':'u','letters':/[\u00F9\u00FA\u00FB\u00FC\u0169\u016B\u016B\u016D\u016F\u0171\u0173\u01B0\u01D4\u01D6\u01D8\u01DA\u01DC]/g},
-    {'base':'w','letters':/[\u0175]/g},
-    {'base':'y','letters':/[\u00FD\u00FF\u0177]/g},
-    {'base':'z','letters':/[\u017A\u017C\u017E]/g},
-    {'base':'A','letters':/[\u00C1\u00C2\u00C3\uCC04\u00C5\u00E0\u0100\u0102\u0104\u01CD\u01FB]/g},
-    {'base':'AE','letters':/[\u00C6]/g},
-    {'base':'C','letters':/[\u00C7\u0106\u0108\u010A\u010C]/g},
-    {'base':'D','letters':/[\u010E\u0110\u00D0]/g},
-    {'base':'E','letters':/[\u00C8\u00C9\u00CA\u00CB\u0112\u0114\u0116\u0118\u011A]/g},
-    {'base':'G','letters':/[\u011C\u011E\u0120\u0122]/g},
-    {'base':'H','letters':/[\u0124\u0126]/g},
-    {'base':'I','letters':/[\u00CD\u00CC\u00CE\u00CF\u0128\u012A\u012C\u012E\u0049]/g},
-    {'base':'IJ','letters':/[\u0132]/g},
-    {'base':'J','letters':/[\u0134]/g},
-    {'base':'K','letters':/[\u0136]/g},
-    {'base':'L','letters':/[\u0139\u013B\u013D\u013F\u0141]/g},
-    {'base':'N','letters':/[\u00D1\u0143\u0145\u0147\u0149\u014A]/g},
-    {'base':'O','letters':/[\u00D2\u00D3\u00D4\u00D5\u00D6\u014C\u014E\u0150\u01A0\u01D1]/g},
-    {'base':'OE','letters':/[\u0152]/g},
-    {'base':'R','letters':/[\u0154\u0156\u0158]/g},
-    {'base':'S','letters':/[\u015A\u015C\u015E\u0160]/g},
-    {'base':'T','letters':/[\u0162\u0164\u0166]/g},
-    {'base':'U','letters':/[\u00D9\u00DA\u00DB\u00DC\u0168\u016A\u016C\u016E\u0170\u0172\u01AF\u01D3\u01D5\u01D7\u01D9\u01DB]/g},
-    {'base':'W','letters':/[\u0174]/g},
-    {'base':'Y','letters':/[\u0178\u0176]/g},
-    {'base':'Z','letters':/[\u0179\u017B\u017D]/g},
+var defaultDiacriticsRemovalMap = [{
+        'base': 'a',
+        'letters': /[\u00E1\u00E2\u00E3\u00E4\u00E5\u0101\u0103\u0105\u01CE\u01FB\u00C0\u00C4]/g
+    }, {
+        'base': 'ae',
+        'letters': /[\u00E6\u01FD]/g
+    }, {
+        'base': 'c',
+        'letters': /[\u00E7\u0107\u0109\u010B\u010D]/g
+    }, {
+        'base': 'd',
+        'letters': /[\u010F\u0111\u00F0]/g
+    }, {
+        'base': 'e',
+        'letters': /[\u00E8\u00E9\u00EA\u00EB\u0113\u0115\u0117\u0119\u011B]/g
+    }, {
+        'base': 'f',
+        'letters': /[\u0192]/g
+    }, {
+        'base': 'g',
+        'letters': /[\u011D\u011F\u0121\u0123]/g
+    }, {
+        'base': 'h',
+        'letters': /[\u0125\u0127]/g
+    }, {
+        'base': 'i',
+        'letters': /[\u00ED\u00EC\u00EE\u00EF\u0129\u012B\u012D\u012F\u0131]/g
+    }, {
+        'base': 'ij',
+        'letters': /[\u0133]/g
+    }, {
+        'base': 'j',
+        'letters': /[\u0135]/g
+    }, {
+        'base': 'k',
+        'letters': /[\u0137\u0138]/g
+    }, {
+        'base': 'l',
+        'letters': /[\u013A\u013C\u013E\u0140\u0142]/g
+    }, {
+        'base': 'n',
+        'letters': /[\u00F1\u0144\u0146\u0148\u0149\u014B]/g
+    }, {
+        'base': 'o',
+        'letters': /[\u00F2\u00F3\u00F4\u00F5\u00F6\u014D\u014F\u0151\u01A1\u01D2\u01FF]/g
+    }, {
+        'base': 'oe',
+        'letters': /[\u0153]/g
+    }, {
+        'base': 'r',
+        'letters': /[\u0155\u0157\u0159]/g
+    }, {
+        'base': 's',
+        'letters': /[\u015B\u015D\u015F\u0161]/g
+    }, {
+        'base': 't',
+        'letters': /[\u0163\u0165\u0167]/g
+    }, {
+        'base': 'u',
+        'letters': /[\u00F9\u00FA\u00FB\u00FC\u0169\u016B\u016B\u016D\u016F\u0171\u0173\u01B0\u01D4\u01D6\u01D8\u01DA\u01DC]/g
+    }, {
+        'base': 'w',
+        'letters': /[\u0175]/g
+    }, {
+        'base': 'y',
+        'letters': /[\u00FD\u00FF\u0177]/g
+    }, {
+        'base': 'z',
+        'letters': /[\u017A\u017C\u017E]/g
+    }, {
+        'base': 'A',
+        'letters': /[\u00C1\u00C2\u00C3\uCC04\u00C5\u00E0\u0100\u0102\u0104\u01CD\u01FB]/g
+    }, {
+        'base': 'AE',
+        'letters': /[\u00C6]/g
+    }, {
+        'base': 'C',
+        'letters': /[\u00C7\u0106\u0108\u010A\u010C]/g
+    }, {
+        'base': 'D',
+        'letters': /[\u010E\u0110\u00D0]/g
+    }, {
+        'base': 'E',
+        'letters': /[\u00C8\u00C9\u00CA\u00CB\u0112\u0114\u0116\u0118\u011A]/g
+    }, {
+        'base': 'G',
+        'letters': /[\u011C\u011E\u0120\u0122]/g
+    }, {
+        'base': 'H',
+        'letters': /[\u0124\u0126]/g
+    }, {
+        'base': 'I',
+        'letters': /[\u00CD\u00CC\u00CE\u00CF\u0128\u012A\u012C\u012E\u0049]/g
+    }, {
+        'base': 'IJ',
+        'letters': /[\u0132]/g
+    }, {
+        'base': 'J',
+        'letters': /[\u0134]/g
+    }, {
+        'base': 'K',
+        'letters': /[\u0136]/g
+    }, {
+        'base': 'L',
+        'letters': /[\u0139\u013B\u013D\u013F\u0141]/g
+    }, {
+        'base': 'N',
+        'letters': /[\u00D1\u0143\u0145\u0147\u0149\u014A]/g
+    }, {
+        'base': 'O',
+        'letters': /[\u00D2\u00D3\u00D4\u00D5\u00D6\u014C\u014E\u0150\u01A0\u01D1]/g
+    }, {
+        'base': 'OE',
+        'letters': /[\u0152]/g
+    }, {
+        'base': 'R',
+        'letters': /[\u0154\u0156\u0158]/g
+    }, {
+        'base': 'S',
+        'letters': /[\u015A\u015C\u015E\u0160]/g
+    }, {
+        'base': 'T',
+        'letters': /[\u0162\u0164\u0166]/g
+    }, {
+        'base': 'U',
+        'letters': /[\u00D9\u00DA\u00DB\u00DC\u0168\u016A\u016C\u016E\u0170\u0172\u01AF\u01D3\u01D5\u01D7\u01D9\u01DB]/g
+    }, {
+        'base': 'W',
+        'letters': /[\u0174]/g
+    }, {
+        'base': 'Y',
+        'letters': /[\u0178\u0176]/g
+    }, {
+        'base': 'Z',
+        'letters': /[\u0179\u017B\u017D]/g
+    },
     // Greek letters
-    {'base':'ALPHA','letters':/[\u0391\u03B1]/g},
-    {'base':'BETA','letters':/[\u0392\u03B2]/g},
-    {'base':'GAMMA','letters':/[\u0393\u03B3]/g},
-    {'base':'DELTA','letters':/[\u0394\u03B4]/g},
-    {'base':'EPSILON','letters':/[\u0395\u03B5]/g},
-    {'base':'ZETA','letters':/[\u0396\u03B6]/g},
-    {'base':'ETA','letters':/[\u0397\u03B7]/g},
-    {'base':'THETA','letters':/[\u0398\u03B8]/g},
-    {'base':'IOTA','letters':/[\u0399\u03B9]/g},
-    {'base':'KAPPA','letters':/[\u039A\u03BA]/g},
-    {'base':'LAMBDA','letters':/[\u039B\u03BB]/g},
-    {'base':'MU','letters':/[\u039C\u03BC]/g},
-    {'base':'NU','letters':/[\u039D\u03BD]/g},
-    {'base':'XI','letters':/[\u039E\u03BE]/g},
-    {'base':'OMICRON','letters':/[\u039F\u03BF]/g},
-    {'base':'PI','letters':/[\u03A0\u03C0]/g},
-    {'base':'RHO','letters':/[\u03A1\u03C1]/g},
-    {'base':'SIGMA','letters':/[\u03A3\u03C3]/g},
-    {'base':'TAU','letters':/[\u03A4\u03C4]/g},
-    {'base':'UPSILON','letters':/[\u03A5\u03C5]/g},
-    {'base':'PHI','letters':/[\u03A6\u03C6]/g},
-    {'base':'CHI','letters':/[\u03A7\u03C7]/g},
-    {'base':'PSI','letters':/[\u03A8\u03C8]/g},
-    {'base':'OMEGA','letters':/[\u03A9\u03C9]/g}
+    {
+        'base': 'ALPHA',
+        'letters': /[\u0391\u03B1]/g
+    }, {
+        'base': 'BETA',
+        'letters': /[\u0392\u03B2]/g
+    }, {
+        'base': 'GAMMA',
+        'letters': /[\u0393\u03B3]/g
+    }, {
+        'base': 'DELTA',
+        'letters': /[\u0394\u03B4]/g
+    }, {
+        'base': 'EPSILON',
+        'letters': /[\u0395\u03B5]/g
+    }, {
+        'base': 'ZETA',
+        'letters': /[\u0396\u03B6]/g
+    }, {
+        'base': 'ETA',
+        'letters': /[\u0397\u03B7]/g
+    }, {
+        'base': 'THETA',
+        'letters': /[\u0398\u03B8]/g
+    }, {
+        'base': 'IOTA',
+        'letters': /[\u0399\u03B9]/g
+    }, {
+        'base': 'KAPPA',
+        'letters': /[\u039A\u03BA]/g
+    }, {
+        'base': 'LAMBDA',
+        'letters': /[\u039B\u03BB]/g
+    }, {
+        'base': 'MU',
+        'letters': /[\u039C\u03BC]/g
+    }, {
+        'base': 'NU',
+        'letters': /[\u039D\u03BD]/g
+    }, {
+        'base': 'XI',
+        'letters': /[\u039E\u03BE]/g
+    }, {
+        'base': 'OMICRON',
+        'letters': /[\u039F\u03BF]/g
+    }, {
+        'base': 'PI',
+        'letters': /[\u03A0\u03C0]/g
+    }, {
+        'base': 'RHO',
+        'letters': /[\u03A1\u03C1]/g
+    }, {
+        'base': 'SIGMA',
+        'letters': /[\u03A3\u03C3]/g
+    }, {
+        'base': 'TAU',
+        'letters': /[\u03A4\u03C4]/g
+    }, {
+        'base': 'UPSILON',
+        'letters': /[\u03A5\u03C5]/g
+    }, {
+        'base': 'PHI',
+        'letters': /[\u03A6\u03C6]/g
+    }, {
+        'base': 'CHI',
+        'letters': /[\u03A7\u03C7]/g
+    }, {
+        'base': 'PSI',
+        'letters': /[\u03A8\u03C8]/g
+    }, {
+        'base': 'OMEGA',
+        'letters': /[\u03A9\u03C9]/g
+    }
 
 
 ];
 var changes;
 
 removeDiacritics = function(str) {
-    if(!changes) {
+    if (!changes) {
         changes = defaultDiacriticsRemovalMap;
     }
-    for(var i=0; i<changes.length; i++) {
+    for (var i = 0; i < changes.length; i++) {
         str = str.replace(changes[i].letters, changes[i].base);
     }
     return str;
@@ -744,17 +1198,12 @@ removeDiacritics = function(str) {
 
 regExpEscape = function(s) {
     return String(s).replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, '\\$1').
-        replace(/\x08/g, '\\x08');
+    replace(/\x08/g, '\\x08');
 };
 
 var getTime = function() {
     var currentdate = new Date();
-    var datetime = "Last Sync: " + currentdate.getDate() + "/"
-        + (currentdate.getMonth()+1)  + "/"
-        + currentdate.getFullYear() + " @ "
-        + currentdate.getHours() + ":"
-        + currentdate.getMinutes() + ":"
-        + currentdate.getSeconds();
+    var datetime = "Last Sync: " + currentdate.getDate() + "/" + (currentdate.getMonth() + 1) + "/" + currentdate.getFullYear() + " @ " + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
     return datetime;
 }
 

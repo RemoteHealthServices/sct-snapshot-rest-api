@@ -7,9 +7,10 @@ var ObjectID = require('mongodb').ObjectID;
 var serverDb;
 var resourcesCol;
 
-MongoClient.connect("mongodb://localhost:27017/server", function(err, db) {
+MongoClient.connect("mongodb://michael:better120@ds029541.mongolab.com:29541/better", function(err, db) {
     if (err) {
-        console.warn(getTime() + " - " + err.message);
+        var d = new Date();
+        console.warn(d.getTime() + " - " + err.message);
         res.status(500);
         res.send(err.message);
         return;
