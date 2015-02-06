@@ -803,6 +803,7 @@ router.get('/:db/:collection/descriptions/:sctid?', function(req, res) {
                                                         result.matches.push({
                                                             "term": doc.term,
                                                             "conceptId": doc.conceptId,
+                                                            "descriptionId": doc.descriptionId,
                                                             "active": doc.active,
                                                             "conceptActive": doc.conceptActive,
                                                             "fsn": doc.fsn,
