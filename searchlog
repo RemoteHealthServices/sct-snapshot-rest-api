@@ -1,0 +1,3 @@
+{"searchTerm":null,"database":"en-edition","collection":"v20140731","searchMode":"regex","language":"english","matches":1,"duration":11,"dbduration":8,"level":"info","message":"Search for null result = 1","timestamp":"2015-02-06T23:50:52.882Z"}
+{"searchTerm":null,"database":"en-edition","collection":"v20140731","searchMode":"regex","language":"english","matches":1,"duration":1,"dbduration":0,"level":"info","message":"Search for null result = 1","timestamp":"2015-02-06T23:50:53.922Z"}
+{"searchTerm":null,"database":"en-edition","collection":"v20140731","searchMode":"regex","language":"english","matches":1,"duration":1,"dbduration":0,"level":"info","message":"Search for null result = 1","timestamp":"2015-02-06T23:50:54.841Z"}

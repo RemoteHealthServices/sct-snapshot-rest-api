@@ -6,7 +6,7 @@ var MongoClient = require('mongodb').MongoClient;
 var logger = new(winston.Logger)({
     transports: [
         new(winston.transports.File)({
-            filename: '/Users/michaelyuan/Documents/development/IHTSDO/sct-snapshot-rest-api/search.log'
+            filename: process.cwd() + '/search.log'
         })
     ]
 });
